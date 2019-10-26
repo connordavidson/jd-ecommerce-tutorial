@@ -21,5 +21,6 @@ CORS_ORIGIN_WHITELIST = (
  #stripe
 
  #values in .env and made around https://youtu.be/z7Kq6bHxEcI?t=1227
-STRIPE_PUBLIC_KEY = config(STRIPE_TEST_PUBLIC_KEY)
-STRIPE_SECRET_KEY = config(STRIPE_TEST_SECRET_KEY)
+ #config() is imported in .env
+STRIPE_PUBLIC_KEY = config('STRIPE_TEST_PUBLIC_KEY')
+STRIPE_SECRET_KEY = config('STRIPE_TEST_SECRET_KEY')
