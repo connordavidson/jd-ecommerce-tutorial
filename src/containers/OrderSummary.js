@@ -1,5 +1,7 @@
 import React from 'react';
 import { Button, Container, Header, Icon, Label, Menu, Table } from 'semantic-ui-react';
+
+import { Link } from 'react-router-dom';
 import { authAxios } from '../utils';
 import { orderSummaryURL } from '../constants';
 
@@ -83,7 +85,11 @@ class OrderSummary extends React.Component {
             <Table.Footer>
               <Table.Row>
                 <Table.HeaderCell colSpan='5' textAlign='right'>
-                  <Button color='yellow' >Checkout</Button>
+                  <Link to='/checkout'>
+                    <Button color='yellow' >
+                      Checkout
+                    </Button>
+                  </Link>
                 </Table.HeaderCell>
               </Table.Row>
             </Table.Footer>

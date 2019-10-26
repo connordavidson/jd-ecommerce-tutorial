@@ -9,13 +9,16 @@ import HomepageLayout from "./containers/Home";
 //new
 import ProductList from './containers/ProductList';
 import OrderSummary from './containers/OrderSummary';
+import Checkout from './containers/Checkout';
+
+
 
 const BaseRouter = () => (
   <Hoc>
 
     <Route exact path="/products" component={ProductList} />
     <Route exact path="/order-summary" component={OrderSummary} />
-
+    <Route exact path="/checkout" component={Checkout} />
 
 
     <Route path="/login" component={Login} />
