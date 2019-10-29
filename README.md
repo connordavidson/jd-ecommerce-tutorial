@@ -1,8 +1,9 @@
 
+# READ ME (from cd)
 this readme file came from the original git pull from https://github.com/justdjango/django-react-boilerplate
 
 
-
+# Original readme is found below
 # Django React Boilerplate
 
 [![alt text](https://github.com/justdjango/django-react-boilerplate/blob/master/thumbnail.png "Logo")](https://youtu.be/YKYVv0gm_0o)
