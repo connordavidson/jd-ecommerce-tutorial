@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Container, Header, Icon, Label, Menu, Table } from 'semantic-ui-react';
+import { Button, Container, Header, Icon, Label, Menu, Table, Message, Segment, Dimmer, Loader } from 'semantic-ui-react';
 
 import { Link } from 'react-router-dom';
 import { authAxios } from '../utils';
@@ -17,6 +17,7 @@ class OrderSummary extends React.Component {
       this.handleFetchOrder();
     }
 
+
     handleFetchOrder = () => {
       this.setState({loading: true});
       authAxios
@@ -27,9 +28,22 @@ class OrderSummary extends React.Component {
 
         })
         .catch(err => {
-          this.setState( {error: err, loading: false} );
+          //made this around https://youtu.be/Vm9Z6mm2kcU?t=207
+          //this is what gets triggered if there is no current order
+          if(err.response.status === 404){
+
+            console.log(err.reponse);
+            this.setState({
+              error: "You currently do not have an order" ,
+              loading: false
+            });
+
+          } else{
+            this.setState( {error: err, loading: false} );
+          }
+
         });
-    }
+    };
 
     render(){
 
@@ -39,7 +53,31 @@ class OrderSummary extends React.Component {
       return(
         <Container>
           <Header as='h3'>Order Summary</Header>
-          { data && <Table celled>
+
+          {
+            error &&
+            <Message
+              error
+              header="There was an error"
+              content={JSON.stringify(error)}
+            />
+          }
+
+          {
+            loading &&
+            <Segment>
+              <Dimmer active inverted>
+                <Loader inverted>Loading</Loader>
+              </Dimmer>
+            </Segment>
+          }
+
+          {
+            data
+
+            &&
+
+            <Table celled>
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell>Item #</Table.HeaderCell>
@@ -95,6 +133,10 @@ class OrderSummary extends React.Component {
             </Table.Footer>
 
           </Table>
+
+
+
+
         }
 
         </Container>

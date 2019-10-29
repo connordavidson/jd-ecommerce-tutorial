@@ -87,11 +87,8 @@ class ProductList extends React.Component {
                   header='There was some errors with your submission'
                   content={ JSON.stringify(error) }
                 />
-
               )
-
             }
-
 
             {
               //if loading is true then render the spinner component

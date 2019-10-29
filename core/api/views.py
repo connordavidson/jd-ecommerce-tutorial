@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 
@@ -78,8 +79,10 @@ class OrderDetailView(RetrieveAPIView):
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
             return order
+        #if there is no order
         except ObjectDoesNotExist:
-            return Response( {"message": "You do not have an active order"}, status=HTTP_400_BAD_REQUEST )
+            #changed this response at https://youtu.be/Vm9Z6mm2kcU?t=149
+            raise Http404("You do not have an active order")
 
 
 #created at https://youtu.be/z7Kq6bHxEcI?t=829
@@ -184,3 +187,23 @@ class PaymentView(APIView):
             return Response( { 'message': "A serious error has occurred. We have been notified." } , status=HTTP_400_BAD_REQUEST)
 
         return Response( { 'message': "Invalid data" } , status=HTTP_400_BAD_REQUEST)
+
+
+
+#added at https://youtu.be/Vm9Z6mm2kcU?t=927
+
+
+#this changes the total for the order/cart in the backend.
+class AddCouponView(APIView):
+    def post(self, request, *args, **kwargs):
+        code = request.data.get('code', None)
+        if code is None:
+            return Response( { 'message': "Invalid data received" } , status=HTTP_400_BAD_REQUEST)
+
+        order = Order.objects.get(user=self.request.user, ordered=False)
+        #gets the coupon or returns a 404 if it is wrong
+        coupon = get_object_or_404(Coupon, code=code)
+        #assigns the coupon to the order..
+        order.coupon = coupon
+        order.save()
+        return Response(status=HTTP_200_OK)

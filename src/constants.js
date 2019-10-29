@@ -21,3 +21,6 @@ export const orderSummaryURL = 'http://127.0.0.1:8000/api/order-summary/';
 
 //made at https://youtu.be/z7Kq6bHxEcI?t=1055
 export const checkoutURL = 'http://127.0.0.1:8000/api/checkout/';
+
+//added at https://youtu.be/Vm9Z6mm2kcU?t=1157
+export const addCouponURL = 'http://127.0.0.1:8000/api/add-coupon/';

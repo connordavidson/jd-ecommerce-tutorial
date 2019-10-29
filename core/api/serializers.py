@@ -1,11 +1,22 @@
 from rest_framework import serializers
-from core.models import Item, Order, OrderItem
+from core.models import Item, Order, OrderItem, Coupon
 
 
 
 class StringSerializer(serializers.StringRelatedField):
     def to_internal_value(self, value):
         return value
+
+
+#made at https://youtu.be/Vm9Z6mm2kcU?t=1507
+class CouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coupon
+        fields = (
+            'id',
+            'code',
+            'amount'
+        )
 
 
 class ItemSerializer(serializers.ModelSerializer):
@@ -50,7 +61,8 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'item',
             'quantity',
             'item_obj',
-            'final_price'
+            'final_price',
+            
         )
 
     #fetches item object that is associated with the order item
@@ -61,19 +73,19 @@ class OrderItemSerializer(serializers.ModelSerializer):
         return obj.get_final_price()
 
 
-
 #returns all the items and quantities in an order (also used for the cart)
 class OrderSerializer(serializers.ModelSerializer):
     order_items = serializers.SerializerMethodField()
     total = serializers.SerializerMethodField()
-
+    coupon = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = (
             'id',
             'order_items',
-            'total'
+            'total',
+            'coupon',
         )
 
     def get_order_items(self, obj):
@@ -81,3 +93,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_total(self, obj):
         return obj.get_total()
+
+    def get_coupon(self, obj):
+        if obj.coupon is not None:
+            return CouponSerializer(obj.coupon).data
+        return None
