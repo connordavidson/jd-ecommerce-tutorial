@@ -1,6 +1,18 @@
 from django.contrib import admin
 
-from .models import Item, OrderItem, Order, Payment, Coupon, Refund, Address, UserProfile
+#edited at https://youtu.be/Zg-bzjZuRa0?t=925
+from .models import (
+        Item,
+        OrderItem,
+        Order,
+        Payment,
+        Coupon,
+        Refund,
+        Address,
+        UserProfile,
+        Variation,
+        ItemVariation,
+    )
 
 
 def make_refund_accepted(modeladmin, request, queryset):
@@ -53,6 +65,55 @@ class AddressAdmin(admin.ModelAdmin):
     ]
     list_filter = ['default', 'address_type', 'country']
     search_fields = ['user', 'street_address', 'apartment_address', 'zip']
+
+
+#made at https://youtu.be/Zg-bzjZuRa0?t=975
+#this is for the admin site.
+class ItemVariationAdmin(admin.ModelAdmin):
+    list_display = [
+        'variation',
+        'value',
+        'attachment'
+    ]
+
+    list_filter = [
+        'variation',
+        'variation__item'
+    ]
+
+    search_fields= [
+        'value'
+    ]
+
+#made at https://youtu.be/Zg-bzjZuRa0?t=1062
+class ItemVariationInLineAdmin(admin.TabularInline):
+    model = ItemVariation
+    #only 1 extra row.. i'm assuming that this variable comes from admin.TabularInline
+    extra = 1
+
+#made at https://youtu.be/Zg-bzjZuRa0?t=1105
+class VariationAdmin(admin.ModelAdmin):
+    list_display = [
+        'item',
+        'name'
+    ]
+
+    list_filter = [
+        'item'
+    ]
+
+    search_fields = [
+        'name'
+    ]
+
+    inlines = [
+        ItemVariationInLineAdmin
+    ]
+
+
+#made at https://youtu.be/Zg-bzjZuRa0?t=1090
+admin.site.register(ItemVariation, ItemVariationAdmin)
+admin.site.register(Variation, VariationAdmin)
 
 
 admin.site.register(Item)

@@ -4,19 +4,14 @@
 import React from 'react'
 import { Button, Icon, Image, Item, Label, Container, Segment, Loader, Dimmer, Message } from 'semantic-ui-react'
 import axios from 'axios';
-
 import {connect} from 'react-redux';
 
 
-
-//don't really use this at all
 import {productListURL, addToCartURL} from '../constants'
 import {authAxios} from '../utils';
 import {fetchCart} from '../store/actions/cart';
 
 
-
-//const paragraph = <Image src='/images/wireframe/short-paragraph.png' />
 
 console.log(productListURL);
 console.log(addToCartURL);
@@ -72,6 +67,8 @@ class ProductList extends React.Component {
 
   render() {
 
+
+
     const {data, error, loading} = this.state;
 
       return (
@@ -107,7 +104,6 @@ class ProductList extends React.Component {
 
 
 
-
             <Item.Group divided>
               {/*
                 make the item.group dynamic at https://youtu.be/RG_Y7lIDXPM?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1506
@@ -119,7 +115,8 @@ class ProductList extends React.Component {
                     <Item.Image src={ item.image } />
 
                     <Item.Content>
-                      <Item.Header as='a'>{item.title}</Item.Header>
+                      {/*changed this line to push the history stack at https://youtu.be/Zg-bzjZuRa0?t=467*/}
+                      <Item.Header as='a' onClick={() => this.props.history.push(`/products/${item.id}`)}>{item.title}</Item.Header>
                       <Item.Meta>
                         <span className='cinema'>{item.category}</span>
                       </Item.Meta>

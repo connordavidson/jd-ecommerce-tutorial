@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import Item, Order, OrderItem, Coupon
+from core.models import Item, Order, OrderItem, Coupon, Variation, ItemVariation
 
 
 
@@ -62,7 +62,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'quantity',
             'item_obj',
             'final_price',
-            
+
         )
 
     #fetches item object that is associated with the order item
@@ -98,3 +98,69 @@ class OrderSerializer(serializers.ModelSerializer):
         if obj.coupon is not None:
             return CouponSerializer(obj.coupon).data
         return None
+
+
+
+#made at https://youtu.be/Zg-bzjZuRa0?t=1317
+#put simply this serializes the variation options (ex. returns the photo and value for the 'sm' option of the 'size' variation )
+class ItemVariationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItemVariation
+        fields = (
+            'id',
+            'value',
+            'attachment'
+        )
+
+
+#put simply: this returns all the options for a given variation
+class VariationSerializer(serializers.ModelSerializer):
+    #retrieves the variations of the item (sm, md, lg)
+    item_variations = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Variation
+        fields = (
+            'id',
+            'name',
+            'item_variations',
+        )
+
+    def get_item_variations(self, obj):
+        #returns all the variation options that are linked to this specific variation (ex. returns sm, md, lg for the 'size' variation)
+        return ItemVariationSerializer(obj.itemvariation_set.all(), many=True).data
+
+
+
+#made at https://youtu.be/Zg-bzjZuRa0?t=1190
+#put simply: this returns all the variations for a given item. VariationSerializer, ItemVariationSerializer, and ItemVariationSerializer, all get funneled through this to be sent to the front end
+class ItemDetailSerializer(serializers.ModelSerializer):
+    category = serializers.SerializerMethodField()
+    label = serializers.SerializerMethodField()
+    #gets the variations linked to this specific item
+    variations = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Item
+        fields = (
+            'id',
+            'title',
+            'price',
+            'discount_price',
+            'category',
+            'label',
+            'slug',
+            'description',
+            'image',
+            'variations'
+        )
+
+    def get_category(self, obj):
+        return obj.get_category_display()
+
+    def get_label(self, obj):
+        return obj.get_label_display()
+
+    def get_variations(self, obj):
+        #gets all the variations for this specific item (ex. returns 'size', 'color', 'other_variation' for the 't-shirt' item )
+        return VariationSerializer(obj.variation_set.all(), many=True).data

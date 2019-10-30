@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile
-from .serializers import ItemSerializer, OrderSerializer
+from .serializers import ItemSerializer, OrderSerializer, ItemDetailSerializer
 
 #imported at https://youtu.be/z7Kq6bHxEcI?t=1436
 #from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile
@@ -26,6 +26,14 @@ class ItemListView(ListAPIView):
     permission_classes = (AllowAny, )
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
+
+
+#created at https://youtu.be/Zg-bzjZuRa0?t=175
+class ItemDetailView(RetrieveAPIView):
+    permission_classes = (AllowAny, )
+    serializer_class = ItemDetailSerializer
+    queryset = Item.objects.all()
+
 
 
 #created at https://youtu.be/0JOl3ckfGAM?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=290 ish

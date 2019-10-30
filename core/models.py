@@ -44,6 +44,9 @@ class Item(models.Model):
     description = models.TextField()
     image = models.ImageField()
 
+
+
+
     def __str__(self):
         return self.title
 
@@ -61,6 +64,46 @@ class Item(models.Model):
         return reverse("core:remove-from-cart", kwargs={
             'slug': self.slug
         })
+
+#added this at https://youtu.be/Zg-bzjZuRa0?t=705
+class Variation(models.Model):
+    #links the variation to the specific item that it is a variation of
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    #name, size, color, etc could be possible options (depending on what the specific item is )
+    name = models.CharField(max_length=50)
+
+    #made at https://youtu.be/Zg-bzjZuRa0?t=950
+    class Meta:
+        #tuple of tuples
+        unique_together = (
+            #makes sure that the variation and the value are uniquely attached together. to make sure that there are no repeats for the item and variation options (ex. to make sure that there is not more than one variation that is for color for the same item)
+            ('item' , 'name')
+        )
+
+    def __str__(self):
+        return self.name
+
+
+
+#added this at https://youtu.be/Zg-bzjZuRa0?t=736
+class ItemVariation(models.Model):
+    #links the item variation to the specific variation that it is linked to.. if the options are sm, md, lg, it is linked to the "size" variation
+    variation = models.ForeignKey(Variation, on_delete=models.CASCADE)
+    #different items for the variation (ie if the variation is a size variation, this would be sm, md, lg etc )
+    value = models.CharField(max_length=50)
+    #can display images of the different variations (ie, when they select a different color, present the image of that color to them )
+    attachment = models.ImageField(blank=True)
+
+    #made this class at https://youtu.be/Zg-bzjZuRa0?t=911
+    class Meta:
+        #tuple of tuples
+        unique_together = (
+            #makes sure that the variation and the value are uniquely attached together. to make sure that there is not more than one shirt variation that is for color
+            ('variation' , 'value')
+        )
+
+    def __str__(self):
+        return self.value
 
 
 class OrderItem(models.Model):
