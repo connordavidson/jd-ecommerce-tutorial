@@ -59,15 +59,25 @@ class CustomLayout extends React.Component {
                   className='link item'
                 >
                 <Dropdown.Menu>
-                  {cart && cart.order_items.map(order_item =>{
+                  {
+                    cart &&
+                    cart.order_items.map(order_item =>{
 
-                    return(
-                      <Dropdown.Item key={order_item.id}>
-                        {order_item.quantity} x {order_item.item}
+                      return(
+                        <Dropdown.Item key={order_item.id}>
+                          {order_item.quantity} x {order_item.item.title}
+                        </Dropdown.Item>
+                      );
+                    })
+                  }
+                  {
+                    cart &&
+                    cart.order_items.length < 1 ?
+                      <Dropdown.Item >
+                      No items in your cart
                       </Dropdown.Item>
-                    );
-                  })}
-                  {cart && cart.order_items.length < 1 ? <Dropdown.Item >No items in your cart</Dropdown.Item> : null}
+                    : null
+                  }
 
                   <Dropdown.Divider />
                   {/* link to the checkout page */}
@@ -90,10 +100,7 @@ class CustomLayout extends React.Component {
 
               </React.Fragment>
 
-
             ) : (
-
-
               <React.Fragment>
 
                 <Link to="/login">
@@ -104,12 +111,8 @@ class CustomLayout extends React.Component {
                 </Link>
 
               </React.Fragment>
-
-
             )}
-
             </Menu.Menu>
-
           </Container>
         </Menu>
 

@@ -122,11 +122,12 @@ class ProductList extends React.Component {
                       </Item.Meta>
                       <Item.Description>{item.description}</Item.Description>
                       <Item.Extra>
-
-                        <Button primary floated='right' icon labelPosition='right' onClick={ () => this.handleAddToCart(item.slug) }>
-                          Add to cart
-                          <Icon name='cart plus' />
-                        </Button>
+                        {/*
+                         <Button primary floated='right' icon labelPosition='right' onClick={ () => this.handleAddToCart(item.slug) }>
+                           Add to cart
+                           <Icon name='cart plus' />
+                         </Button>
+                        */}
 
                         {
                           item.discount_price &&

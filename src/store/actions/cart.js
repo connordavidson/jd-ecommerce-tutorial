@@ -10,6 +10,8 @@ from "./actionTypes";
 import {authAxios} from '../../utils';
 import {orderSummaryURL} from '../../constants';
 
+
+
 export const cartStart = () => {
   return {
     type: CART_START,
@@ -18,7 +20,7 @@ export const cartStart = () => {
 
 
 export const cartSuccess = data => {
-  console.log(data);
+  //console.log('CART: ', data);
   return {
     type: CART_SUCCESS,
     data

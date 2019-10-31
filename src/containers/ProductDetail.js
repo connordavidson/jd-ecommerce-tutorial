@@ -16,7 +16,12 @@ import {
   Message,
   Card,
   Grid,
-  Header
+  Header,
+  Form,
+  Divider,
+  Dropdown,
+  Select
+
 } from 'semantic-ui-react'
 import axios from 'axios';
 
@@ -29,24 +34,28 @@ import {authAxios} from '../utils';
 import {fetchCart} from '../store/actions/cart';
 
 
-console.log(productDetailURL);
-
-
-
-
 class ProductDetail extends React.Component {
-
 
 
   state = {
     loading: false,
     error: null,
-    data: []
+    formVisible: false,
+    data: [],
+    formData: {}
   }
 
   componentDidMount() {
     this.handleFetchItem();
 
+  }
+
+  //switches the formVisible const in the state.. is used to drop the form to select the variations that you want
+  handleToggleForm = () => {
+    const {formVisible} = this.state;
+    this.setState({
+      formVisible: !formVisible
+    })
   }
 
   handleFetchItem = () => {
@@ -63,14 +72,28 @@ class ProductDetail extends React.Component {
       });
   }
 
+  //made at https://youtu.be/qJN1_2ZwqeA?t=1386
+  handleFormatData = (formData) => {
+    //returns the keys of the formData array becuase that is what the backend is expecting
+    return Object.keys(formData).map(key =>{
+      return formData[key];
+    })
+  }
+
 
 
   handleAddToCart = slug => {
 
     this.setState({ loading: true });
+    const {formData} = this.state;
+    console.log("formData: ", formData);
+    //filters  the data into the correct format fot hte backend
+    const variations = this.handleFormatData(formData);
+    console.log("formVariations: ", variations);
+
     //authAxios makes sure that the user is signed in before adding to cart... just use axios for adding to cart while signed out
     authAxios
-    .post( addToCartURL , {slug}  )
+    .post( addToCartURL , { slug, variations } )
     .then(res => {
       console.log(res.data, addToCartURL, "add to cart succeeded");
       this.props.fetchCart();
@@ -85,13 +108,30 @@ class ProductDetail extends React.Component {
 
 
 
+  handleChange = (e, {name, value}) => {
+    //made around https://youtu.be/qJN1_2ZwqeA?t=1126
+    const {formData} = this.state
+    const updatedFormData = {
+      //spread of the formData
+      ...formData,
+      //changes the name of the key to be the value (this is for passing info to the backend.. ex. changes the name "red" to 1)
+      [name]: value
+    }
+    this.setState({ formData: updatedFormData})
+    console.log(name);
+    console.log(value);
+  }
+
+
+
 
   render() {
 
-      console.log(this.props);
+      console.log("this.props: " ,this.props);
 
 
-      const {data, error, loading} = this.state;
+
+      const {data, error, formData, formVisible, loading} = this.state;
       const item = data;
 
       return (
@@ -127,6 +167,7 @@ class ProductDetail extends React.Component {
             {/*made at https://youtu.be/Zg-bzjZuRa0?t=539*/}
             <Grid columns={2} divided>
               <Grid.Row>
+                {/*the product information (on the left side  of the screen)*/}
                 <Grid.Column>
                   {/*fluid makes the card take up the entire lefthand side of the grid colum.. it was smaller wihtout the fluid attribute */}
                   <Card
@@ -156,46 +197,81 @@ class ProductDetail extends React.Component {
                     description={item.description}
                     extra={(
                       <React.Fragment>
-
                         <Button
                             fluid
                             color="yellow"
                             floated='right'
                             icon
                             labelPosition='right'
-                            onClick={ () => this.handleAddToCart(item.slug) }
+                            onClick={ this.handleToggleForm }
                           >
                             Add to cart
                             <Icon name='cart plus' />
                         </Button>
-
-
                       </React.Fragment>
                     )}
                   />
+
+                  {
+                    formVisible &&
+                    <React.Fragment>
+                      <Divider />
+                      <Form>
+                        {
+                          //this dynamically prints out the select box and all the options
+                          data.variations.map(v => {
+                            const name = v.name.toLowerCase();
+                            console.log("data.variations: ", data.variations);
+                            return  (
+                              <Form.Field key={v.id} >
+                                <Select
+                                  name={name}
+                                  onChange={this.handleChange}
+                                  options={
+                                    v.item_variations.map(item=>{
+                                      return {
+                                        key: item.id,
+                                        text: item.value,
+                                        value: item.id
+                                      }
+                                    })}
+                                  placeholder={`Choose a ${name}`}
+                                  selection
+                                  value={formData[name]}
+                                />
+                              </Form.Field>
+                            )
+                          })
+                        }
+                        <Form.Button
+                          primary
+                          onClick = { () => this.handleAddToCart(item.slug) }
+                        >
+                          Add to Cart
+                        </Form.Button>
+                      </Form>
+                    </React.Fragment>
+
+                  }
 
                 </Grid.Column>
 
 
 
-                <Grid.Column>
 
+                {/*the variations of the item (on the right side of the screen)*/}
+                <Grid.Column>
                   <Header as='h2'>Different Variations</Header>
                   {
                     data.variations &&
-
                     data.variations.map(v => {
                       return (
-                        <React.Fragment>
-
-                          <Item.Group divided key={ v.id }>
+                        <React.Fragment key={ v.id }>
                           <Header as='h3'>{v.name}</Header>
-
+                          <Item.Group divided >
                             {
                               v.item_variations.map(iv => {
                                 return (
-
-
                                     <Item key={ iv.id }>
                                       {
                                         iv.attachment &&
@@ -208,27 +284,17 @@ class ProductDetail extends React.Component {
                                         {iv.value}
                                       </Item.Content>
                                     </Item>
-
                                 );
                               })
                             }
-
                           </Item.Group>
-
                         </React.Fragment>
-
-
                       );
                     })
-
                   }
-
                 </Grid.Column>
               </Grid.Row>
-
             </Grid>
-
-
         </Container>
     );
   }

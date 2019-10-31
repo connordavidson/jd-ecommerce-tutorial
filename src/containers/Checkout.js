@@ -32,12 +32,12 @@ const OrderPreview = (props) => {
                       <Item key={i}>
                         <Item.Image
                           size='tiny'
-                          src={`http://127.0.0.1:8000${orderItem.item_obj.image}`}
+                          src={`http://127.0.0.1:8000${orderItem.item.image}`}
                         />
 
                         <Item.Content verticalAlign='middle'>
                           <Item.Header as='a'>
-                            {orderItem.quantity} x {orderItem.item_obj.title}
+                            {orderItem.quantity} x {orderItem.item.title}
                           </Item.Header>
                           <Item.Extra>
                             <Label>${orderItem.final_price}</Label>

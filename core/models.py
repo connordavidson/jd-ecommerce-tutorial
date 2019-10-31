@@ -65,6 +65,10 @@ class Item(models.Model):
             'slug': self.slug
         })
 
+
+
+
+
 #added this at https://youtu.be/Zg-bzjZuRa0?t=705
 class Variation(models.Model):
     #links the variation to the specific item that it is a variation of
@@ -106,12 +110,17 @@ class ItemVariation(models.Model):
         return self.value
 
 
+
+
 class OrderItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE)
     ordered = models.BooleanField(default=False)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
+    #added around https://youtu.be/qJN1_2ZwqeA?t=173
+    #double checks that there are all the variations for each item that is required for that item
+    item_variations = models.ManyToManyField(ItemVariation)
 
     def __str__(self):
         return f"{self.quantity} of {self.item.title}"

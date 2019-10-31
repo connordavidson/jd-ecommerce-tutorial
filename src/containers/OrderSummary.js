@@ -23,15 +23,17 @@ class OrderSummary extends React.Component {
       authAxios
         .get(orderSummaryURL)
         .then(res => {
-          //dispatches the cartSuccess method with data
-          this.setState( {data: res.data, loading: false} );
+          //res.data.order_items.data
+          console.log("RESPONSE (res.data ): " ,  res.data   );
 
+          //dispatches the cartSuccess method with data
+          this.setState( { data: res.data , loading: false } );
         })
         .catch(err => {
+
           //made this around https://youtu.be/Vm9Z6mm2kcU?t=207
           //this is what gets triggered if there is no current order
-          if(err.response.status === 404){
-
+          if(err.status === 404){
             console.log(err.reponse);
             this.setState({
               error: "You currently do not have an order" ,
@@ -45,10 +47,21 @@ class OrderSummary extends React.Component {
         });
     };
 
+    //created at https://youtu.be/qJN1_2ZwqeA?t=2160
+    renderVariations = (orderItem) => {
+      let text = '';
+      //loop through all the variations of the orderItem
+      orderItem.item_variations.forEach(iv => {
+        //ex: color: red , size: small
+        text += `${iv.variation.name}: ${iv.value} ` ;
+      })
+      return text;
+    }
+
     render(){
 
       const {data, error, loading} = this.state;
-      console.log(data);
+      console.log("DATA: (data)", data);
 
       return(
         <Container>
@@ -89,20 +102,27 @@ class OrderSummary extends React.Component {
               </Table.Row>
             </Table.Header>
 
+
             <Table.Body>
 
-              { data.order_items.map( (order_item, i) => {
-                  return (
+              { data.order_items.map( (orderItem, i) => {
 
-                    <Table.Row key={order_item.id}>
-                      <Table.Cell>{i}</Table.Cell>
-                      <Table.Cell>{order_item.item}</Table.Cell>
-                      <Table.Cell>${order_item.item_obj.price}</Table.Cell>
-                      <Table.Cell>{order_item.quantity}</Table.Cell>
-                      <Table.Cell>{order_item.item_obj.discount_price && (
-                        <Label color="green" ribbon>ON DISCOUNT</Label>
-                        )}
-                      {order_item.final_price}</Table.Cell>
+                  return (
+                    <Table.Row key={orderItem.id}>
+                      <Table.Cell>{i + 1}</Table.Cell>
+                      <Table.Cell>{orderItem.item.title} - {this.renderVariations(orderItem)}</Table.Cell>
+                      <Table.Cell>${orderItem.item.price}</Table.Cell>
+                      <Table.Cell>{orderItem.quantity}</Table.Cell>
+                      <Table.Cell>
+
+                        {
+                        orderItem.item.discount_price &&
+                          (
+                          <Label color="green" ribbon>ON DISCOUNT</Label>
+                          )
+                        }
+                        ${orderItem.final_price}
+                      </Table.Cell>
                     </Table.Row>
                   )
               }) }

@@ -45,14 +45,40 @@ class ItemSerializer(serializers.ModelSerializer):
 
 
 
+#created at https://youtu.be/qJN1_2ZwqeA?t=284
+class VariationDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Variation
+        fields = (
+            'id',
+            'name',
+            'item'
+        )
+
+#made at https://youtu.be/qJN1_2ZwqeA?t=305
+#serializes all the item variations
+class ItemVariationDetailSerializer(serializers.ModelSerializer):
+    variation = serializers.SerializerMethodField()
+    class Meta:
+        model = ItemVariation
+        fields = (
+            'id',
+            'value',
+            'attachment',
+            'variation'
+        )
+
+    def get_variation(self, obj):
+        return VariationDetailSerializer(obj.variation).data
+
 
 #created at https://youtu.be/0JOl3ckfGAM?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1369
 #gets the item and quantity.. for the OrderSerializer
 class OrderItemSerializer(serializers.ModelSerializer):
-    item = StringSerializer()
-    item_obj = serializers.SerializerMethodField()
+    #changed at https://youtu.be/qJN1_2ZwqeA?t=441
+    item = serializers.SerializerMethodField()
+    item_variations = serializers.SerializerMethodField()
     final_price = serializers.SerializerMethodField()
-
 
     class Meta:
         model = OrderItem
@@ -60,14 +86,17 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'id',
             'item',
             'quantity',
-            'item_obj',
             'final_price',
-
+            'item_variations'
         )
 
     #fetches item object that is associated with the order item
-    def get_item_obj(self, obj):
+    def get_item(self, obj):
         return ItemSerializer(obj.item).data
+
+    def get_item_variations(self, obj):
+        #used .item_variations.all() becuase it's a ManyToMany relation
+        return ItemVariationDetailSerializer( obj.item_variations.all(), many=True ).data
 
     def get_final_price(self, obj):
         return obj.get_final_price()
