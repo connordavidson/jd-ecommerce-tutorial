@@ -3,24 +3,28 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
+from django_countries import countries
 
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile, Variation, ItemVariation
-from .serializers import ItemSerializer, OrderSerializer, ItemDetailSerializer
-
-#imported at https://youtu.be/z7Kq6bHxEcI?t=1436
-#from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile
+from .serializers import ItemSerializer, OrderSerializer, ItemDetailSerializer, AddressSerializer
 
 import stripe
 
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+#created at https://youtu.be/c54wYYIXZ-A?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=2521
+class UserIDView(APIView):
+    def get(self, request, *args, **kwargs):
+        return Response({'userID': request.user.id }, status=HTTP_200_OK)
+
 
 class ItemListView(ListAPIView):
     permission_classes = (AllowAny, )
@@ -97,7 +101,7 @@ class AddToCartView(APIView):
         if order_qs.exists():
             order = order_qs[0]
             # check if the order item is in the order
-            #if the order doesn't contain the item with order_item.id, add it to the cart (it filters it and then checks if there are 0 results after the filter) 
+            #if the order doesn't contain the item with order_item.id, add it to the cart (it filters it and then checks if there are 0 results after the filter)
             if not order.items.filter(item__id=order_item.id).exists():
                 order.items.add(order_item)
             #returns responses from the framework
@@ -236,8 +240,6 @@ class PaymentView(APIView):
 
 
 #added at https://youtu.be/Vm9Z6mm2kcU?t=927
-
-
 #this changes the total for the order/cart in the backend.
 class AddCouponView(APIView):
     def post(self, request, *args, **kwargs):
@@ -252,3 +254,30 @@ class AddCouponView(APIView):
         order.coupon = coupon
         order.save()
         return Response(status=HTTP_200_OK)
+
+
+#created at https://youtu.be/c54wYYIXZ-A?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1591
+class CountryListView(APIView):
+    def get(self, request, *args, **kwargs):
+        return Response(countries, status=HTTP_200_OK)
+
+
+#created at https://youtu.be/c54wYYIXZ-A?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=910
+class AddressListView(ListAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = AddressSerializer
+
+    def get_queryset(self):
+        #made big changes to this at https://youtu.be/c54wYYIXZ-A?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=3030
+        address_type = self.request.query_params.get('address_type', None)
+        qs = Address.objects.all()
+        if address_type is None:
+            return qs
+        return qs.filter(user=self.request.user, address_type=address_type)
+
+
+#created at https://youtu.be/c54wYYIXZ-A?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1316
+class AddressCreateView(CreateAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = AddressSerializer
+    queryset = Address.objects.all()

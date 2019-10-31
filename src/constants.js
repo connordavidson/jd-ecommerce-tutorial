@@ -30,3 +30,15 @@ export const checkoutURL = 'http://127.0.0.1:8000/api/checkout/';
 
 //added at https://youtu.be/Vm9Z6mm2kcU?t=1157
 export const addCouponURL = 'http://127.0.0.1:8000/api/add-coupon/';
+
+//added at https://youtu.be/c54wYYIXZ-A?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1082
+export const addressListURL = (addressType) => `http://127.0.0.1:8000/api/addresses/?address_type=${addressType}`;
+
+//added at https://youtu.be/c54wYYIXZ-A?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1360
+export const addressCreateURL = 'http://127.0.0.1:8000/api/addresses/create/';
+
+//added at https://youtu.be/c54wYYIXZ-A?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1550
+export const countryListURL = 'http://127.0.0.1:8000/api/countries/';
+
+//added at https://youtu.be/c54wYYIXZ-A?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=2560
+export const userIDURL = 'http://127.0.0.1:8000/api/user-id/';
