@@ -53,7 +53,7 @@ class OrderSummary extends React.Component {
       //loop through all the variations of the orderItem
       orderItem.item_variations.forEach(iv => {
         //ex: color: red , size: small
-        text += `${iv.variation.name}: ${iv.value} ` ;
+        text += `${iv.variation.name}: ${iv.value} | ` ;
       })
       return text;
     }
@@ -110,7 +110,7 @@ class OrderSummary extends React.Component {
                   return (
                     <Table.Row key={orderItem.id}>
                       <Table.Cell>{i + 1}</Table.Cell>
-                      <Table.Cell>{orderItem.item.title} - {this.renderVariations(orderItem)}</Table.Cell>
+                      <Table.Cell>{orderItem.item.title} - | {this.renderVariations(orderItem)}</Table.Cell>
                       <Table.Cell>${orderItem.item.price}</Table.Cell>
                       <Table.Cell>{orderItem.quantity}</Table.Cell>
                       <Table.Cell>

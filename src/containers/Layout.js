@@ -25,6 +25,16 @@ class CustomLayout extends React.Component {
 
   }
 
+  renderVariations = (orderItem) => {
+    let text = '';
+    //loop through all the variations of the orderItem
+    orderItem.item_variations.forEach(iv => {
+      //ex: color: red , size: small
+      text += `${iv.variation.name}: ${iv.value} |` ;
+    })
+    return text;
+  }
+
 
   render() {
     //instantiates constants from the props
@@ -61,11 +71,13 @@ class CustomLayout extends React.Component {
                 <Dropdown.Menu>
                   {
                     cart &&
+
                     cart.order_items.map(order_item =>{
+                      console.log(cart);
 
                       return(
                         <Dropdown.Item key={order_item.id}>
-                          {order_item.quantity} x {order_item.item.title}
+                          {order_item.quantity} x {order_item.item.title} - | {this.renderVariations(order_item)}
                         </Dropdown.Item>
                       );
                     })
