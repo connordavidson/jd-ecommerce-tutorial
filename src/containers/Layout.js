@@ -39,6 +39,7 @@ class CustomLayout extends React.Component {
   render() {
     //instantiates constants from the props
     const { authenticated, cart, loading } = this.props;
+    console.log(cart);
 
     return (
       <div>
@@ -64,9 +65,6 @@ class CustomLayout extends React.Component {
                   </Menu.Item>
                 </Link>
 
-
-
-
                 <Dropdown
                     icon='cart'
                     loading= {loading}
@@ -76,39 +74,39 @@ class CustomLayout extends React.Component {
                     pointing
                     className='link item'
                   >
-                  <Dropdown.Menu>
-                    {
-                      cart &&
 
-                      cart.order_items.map(order_item =>{
-                      
 
-                        return(
-                          <Dropdown.Item key={order_item.id}>
-                            {order_item.quantity} x {order_item.item.title} - | {this.renderVariations(order_item)}
-                          </Dropdown.Item>
-                        );
-                      })
-                    }
-                    {
-                      cart &&
-                      cart.order_items.length < 1 ?
-                        <Dropdown.Item text='No items in your cart' />
+                      <Dropdown.Menu>
+                        { cart !== null ? (
+                            <React.Fragment>
+                              {
+                                cart.order_items.map(order_item => {
+                                  return(
+                                    <Dropdown.Item key={order_item.id}>
+                                      {order_item.quantity} x {order_item.item.title} - | {this.renderVariations(order_item)}
+                                    </Dropdown.Item>
+                                  );
+                                })
+                              }
 
-                      : null
-                    }
+                              <Dropdown.Divider />
+                              {/* link to the checkout page */}
+                              <Dropdown.Item
+                                icon='arrow right'
+                                text='Checkout'
+                                onClick={ () =>
+                                  this.props.history.push('/order-summary')
+                                }
+                              />
+                            </React.Fragment>
+                          ) : (
+                            <Dropdown.Item >
+                              No items in your cart
+                            </Dropdown.Item>
+                          )
+                        }
+                      </Dropdown.Menu>
 
-                    <Dropdown.Divider />
-                    {/* link to the checkout page */}
-                    <Dropdown.Item
-                      icon='arrow right'
-                      text='Checkout'
-                      onClick={ () =>
-                        this.props.history.push('/order-summary')
-                      }
-                    />
-
-                  </Dropdown.Menu>
 
                 </Dropdown>
 

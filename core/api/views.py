@@ -138,63 +138,79 @@ class OrderDetailView(RetrieveAPIView):
 class PaymentView(APIView):
 
     def post(self, request, *args, **kwargs):
+
+
         order = Order.objects.get(user=self.request.user, ordered=False)
+
         userprofile = UserProfile.objects.get(user=self.request.user)
+
         token = request.data.get('stripeToken') #stripeToken comes from Checkout.js
+        #added at https://youtu.be/NaJ-b0ZaSoI?t=1275
+        billing_address_id = request.data.get('selectedBillingAddress')
+        shipping_address_id = request.data.get('selectedShippingAddress')
 
-        save = False
-        use_default = False
+        billing_address = Address.objects.get(id=billing_address_id)
+        shipping_address = Address.objects.get(id=shipping_address_id)
 
-        if save:
-            if userprofile.stripe_customer_id != '' and userprofile.stripe_customer_id is not None:
-                customer = stripe.Customer.retrieve(
-                    userprofile.stripe_customer_id)
-                customer.sources.create(source=token)
+        #explanation of this code at https://youtu.be/NaJ-b0ZaSoI?t=1360
 
-            else:
-                customer = stripe.Customer.create(
-                    email=self.request.user.email,
-                )
-                customer.sources.create(source=token)
-                userprofile.stripe_customer_id = customer['id']
-                userprofile.one_click_purchasing = True
-                userprofile.save()
+        # if userprofile.stripe_customer_id != '' and userprofile.stripe_customer_id is not None:
+        #     customer = stripe.Customer.retrieve(
+        #         userprofile.stripe_customer_id)
+        #     customer.sources.create(source=token)
+        #
+        # else:
+        # customer = stripe.Customer.create(
+        #     email=self.request.user.email,
+        # )
+        # customer.sources.create(source=token)
+        # userprofile.stripe_customer_id = customer['id']
+        # userprofile.one_click_purchasing = True
+        # userprofile.save()
 
         amount = int(order.get_total() * 100)
 
+        #READ BELOW
+        #NOTE: there is some major fanagling happening in this try-catch block.
+        #Stripe payment api didn't work so i just force the information into the order table
+        #this doesn't matter, bc the stripe api doesn't do anything anyway. but now i know that the button can submit an order to the db
         try:
+            # charge the customer because we cannot charge the token more than once
+            # charge = stripe.Charge.create(
+            #     amount=amount,  # cents
+            #     currency="usd",
+            #     customer=userprofile.stripe_customer_id
+            # )
 
-            if use_default or save:
-                # charge the customer because we cannot charge the token more than once
-                charge = stripe.Charge.create(
-                    amount=amount,  # cents
-                    currency="usd",
-                    customer=userprofile.stripe_customer_id
-                )
-            else:
-                # charge once off on the token
-                charge = stripe.Charge.create(
-                    amount=amount,  # cents
-                    currency="usd",
-                    source=token
-                )
+            # charge once off on the token
+            # charge = stripe.Charge.create(
+            #     amount=amount,  # cents
+            #     currency="usd",
+            #     source=token
+            # )
 
             # create the payment
-            payment = Payment()
-            payment.stripe_charge_id = charge['id']
-            payment.user = self.request.user
-            payment.amount = order.get_total()
-            payment.save()
+            # payment = Payment()
+            # #had to butcher some of this bc i don't care to get the stripe api working
+            # payment.stripe_charge_id = 'ch_iS607g3XF8DhAA3sYSqe'   # charge['id']
+            # payment.user = self.request.user
+            # payment.amount = order.get_total()
+            # payment.save()
+
 
             # assign the payment to the order
-
             order_items = order.items.all()
             order_items.update(ordered=True)
             for item in order_items:
                 item.save()
 
             order.ordered = True
-            order.payment = payment
+            # order.payment = payment
+
+            #made at https://youtu.be/NaJ-b0ZaSoI?t=1405
+            order.billing_address = billing_address
+            order.shipping_address = shipping_address
+
             #order.ref_code = create_ref_code()
             order.save()
 

@@ -1,11 +1,44 @@
 import React, {Component} from 'react';
-import {CardElement, injectStripe, Elements, StripeProvider} from 'react-stripe-elements';
+import {
+  CardElement,
+  injectStripe,
+  Elements,
+  StripeProvider
+} from 'react-stripe-elements';
 
-import {Button, Container, Message, Item, Divider, Header, Loader, Segment, Dimmer, Icon, Label, Checkbox, Form } from 'semantic-ui-react';
+import {
+    Button,
+    Container,
+    Message,
+    Item,
+    Divider,
+    Header,
+    Loader,
+    Segment,
+    Dimmer,
+    Icon,
+    Label,
+    Checkbox,
+    Form,
+    Select
+
+  } from 'semantic-ui-react';
+
+import {
+    Link,
+    withRouter,
+
+  } from 'react-router-dom';
 
 import {authAxios} from '../utils';
 
-import {checkoutURL, orderSummaryURL, addCouponURL} from '../constants';
+import {
+    checkoutURL,
+    orderSummaryURL,
+    addCouponURL,
+    addressListURL
+
+  } from '../constants';
 
 //made this file at https://youtu.be/z7Kq6bHxEcI?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=426
 //made major restructuring to this file around https://youtu.be/Vm9Z6mm2kcU?t=1856 . the idea was to only have 1 component with state object instead of 3
@@ -15,7 +48,6 @@ import {checkoutURL, orderSummaryURL, addCouponURL} from '../constants';
 const OrderPreview = (props) => {
 
     const { data } = props;
-    console.log(data);
     return(
       <div>
         <React.Fragment>
@@ -27,7 +59,6 @@ const OrderPreview = (props) => {
                 <Item.Group relaxed>
                   {/*loops through the items in the cart and displays them 1 by 1*/}
                   {data.order_items.map((orderItem, i) => {
-                    console.log(orderItem)
                     return (
                       <Item key={i}>
                         <Item.Image
@@ -130,23 +161,91 @@ class CouponForm extends Component {
 
 
 
-
-
-
-
 class CheckoutForm extends Component {
 
   state = {
     data: null,
     loading: false,
     error: null,
-    success: false
+    success: false,
+    shippingAddresses: [],
+    billingAddresses: [],
+    selectedBillingAddress: '',
+    selectedShippingAddress: '',
+
   }
 
   componentDidMount(){
     //gets the order when the component has mounted
     this.handleFetchOrder();
+    this.handleFetchBillingAddresses();
+    this.handleFetchShippingAddresses();
   }
+
+  //made at https://youtu.be/NaJ-b0ZaSoI?t=875
+  handleGetDefaultAddress = (addresses) => {
+    const filteredAddresses = addresses.filter( el => el.default === true )
+    if(filteredAddresses.length > 0){
+
+      return filteredAddresses[0].id;
+    }
+    return '';
+
+  }
+
+  //created at https://youtu.be/NaJ-b0ZaSoI?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=175
+  handleFetchBillingAddresses = () => {
+    this.setState({loading: true});
+    authAxios
+      //takes B for Billing
+      .get(addressListURL('B'))
+      .then(res => {
+        //dispatches the cartSuccess method with data
+        this.setState({
+          billingAddresses: res.data.map(a => {
+            return {
+              key: a.id,
+              text: `${a.street_address}, ${a.apartment_address}, ${a.country}`,
+              value: a.id
+              };
+            }),
+          selectedBillingAddress: this.handleGetDefaultAddress(res.data) ,
+          loading: false
+        });
+      })
+      .catch(err => {
+          this.setState( {error: err, loading: false} );
+      });
+  }
+
+
+  //created at https://youtu.be/NaJ-b0ZaSoI?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=209
+  handleFetchShippingAddresses = () => {
+    this.setState({loading: true});
+    authAxios
+      //S for shipping
+      .get(addressListURL('S'))
+      .then(res => {
+        //dispatches the cartSuccess method with data
+        this.setState({
+          shippingAddresses: res.data.map(a => {
+            return {
+              key: a.id,
+              text: `${a.street_address}, ${a.apartment_address}, ${a.country}`,
+              value: a.id
+              };
+            }),
+          selectedShippingAddress: this.handleGetDefaultAddress(res.data) ,
+          loading: false
+        });
+      })
+      .catch(err => {
+          this.setState( {error: err, loading: false} );
+        });
+  }
+
+
+
 
   //comes from OrderSummary.js
   handleFetchOrder = () => {
@@ -154,22 +253,16 @@ class CheckoutForm extends Component {
     authAxios
       .get(orderSummaryURL)
       .then(res => {
-        console.log(res.data)
         //dispatches the cartSuccess method with data
         this.setState( {data: res.data, loading: false} );
-
       })
       .catch(err => {
         //made this around https://youtu.be/Vm9Z6mm2kcU?t=207
         //this is what gets triggered if there is no current order
         if(err.response.status === 404){
-
-          console.log(err.reponse);
-          this.setState({
-            error: "You currently do not have an order" ,
-            loading: false
-          });
-
+          //made at https://youtu.be/NaJ-b0ZaSoI?t=1620
+          //moves the user to /products if they don't have an active order. 
+          this.props.history.push('/products');
         } else{
           this.setState( {error: err, loading: false} );
         }
@@ -192,6 +285,14 @@ class CheckoutForm extends Component {
     });
   };
 
+  //made at https://youtu.be/NaJ-b0ZaSoI?t=1035
+  //for letting the user select more than just the default shipping address
+  handleSelectChange = (e, { name, value }) => {
+    this.setState({
+      [name]: value
+    });
+  };
+
 
   //filled out this at https://youtu.be/z7Kq6bHxEcI?t=566
   //for submitting the payment
@@ -199,17 +300,26 @@ class CheckoutForm extends Component {
       ev.preventDefault();
       // User clicked submit
        this.setState({ loading: true});
-
        if(this.props.stripe){
-         console.log('Stripe is loaded');
         //changed at https://youtu.be/z7Kq6bHxEcI?t=1344
          this.props.stripe.createToken()
          .then(result => {
            if(result.error){
              this.setState({ error: result.error.message, loading: false });
            } else{
+             this.setState({ error: null });
+             const {
+               selectedBillingAddress,
+               selectedShippingAddress,
+             } = this.state;
+
              authAxios
-              .post(checkoutURL, {stripeToken: result.token.id})
+              .post(checkoutURL,
+                {
+                  stripeToken: result.token.id,
+                  selectedBillingAddress,
+                  selectedShippingAddress
+                })
               .then(res => {
                   this.setState({ loading: false, success: true });
               })
@@ -224,7 +334,17 @@ class CheckoutForm extends Component {
     }
 
   render() {
-    const {data, error, loading, success} = this.state;
+    const {
+        data,
+        error,
+        loading,
+        success,
+        billingAddresses,
+        shippingAddresses,
+        selectedBillingAddress,
+        selectedShippingAddress,
+
+      } = this.state;
 
     return (
       <div>
@@ -268,22 +388,85 @@ class CheckoutForm extends Component {
         {/*displays the order preview*/}
         <OrderPreview data={data} />
         <Divider />
+
         {/*added handleRefresh at https://youtu.be/Vm9Z6mm2kcU?t=1788 ..... handleRefresh gets turned into handleAddCoupon at https://youtu.be/Vm9Z6mm2kcU?t=2056*/}
         <CouponForm
           handleAddCoupon={(e, code) => this.handleAddCoupon(e, code)}
         />
         <Divider />
 
-        <Header>Would you like to complete the purchase?</Header>
-        <CardElement />
-        <Button loading={loading}
-          disabled={loading}
-          primary
-          onClick={this.submit}
-          style={{ marginTop: '10px' }}
-        >
-          Purchase
-        </Button>
+        {/*made at https://youtu.be/NaJ-b0ZaSoI?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=560 ish*/}
+        <Header>Select a billing address [{billingAddresses.length}]</Header>
+        {
+          //checks if there are no shipping addresses and suggests a redirection
+          billingAddresses.length > 0 ?
+          <Select
+            name='selectedBillingAddress'
+            value={selectedBillingAddress}
+            clearable
+            options={billingAddresses}
+            selection
+            onChange={this.handleSelectChange}
+          /> :
+            <p>
+              You nede 2 <Link to='/profile'>add an bulling ardreses</Link> plz
+            </p>
+        }
+
+
+        <Header>Select a shipping address [{shippingAddresses.length}]</Header>
+        {
+          //checks if there are no billing addresses and suggests a redirection
+          shippingAddresses.length > 0 ?
+          //changed name to value at https://youtu.be/NaJ-b0ZaSoI?t=1160 so that you can reselect an address
+          <Select
+            name='selectedShippingAddress'
+            value={selectedShippingAddress}
+            clearable
+            options={shippingAddresses}
+            selection
+            onChange={this.handleSelectChange}
+            /> :
+            <p>
+              You nede 2 <Link to='/profile'>add an shipring ardreses</Link> plz
+            </p>
+        }
+        <Divider />
+
+        {
+          //made at https://youtu.be/NaJ-b0ZaSoI?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=360
+          //make ssure that the addresses are saved before displaying the payment option
+          billingAddresses.length < 1 || shippingAddresses.length < 1 ?
+            <p>
+              You nede 2 add ardsess be4 compelteing you'r purshae
+            </p>
+
+          :
+            <React.Fragment>
+              <Header>Would you like to complete the purchase?</Header>
+              <CardElement />
+              {
+                success && (
+                <Message positive>
+                  <Message.Header>Your payment was successful</Message.Header>
+                  <p>
+                    Go to your <b>profile</b> to see the order delivery status.
+                  </p>
+                </Message>
+                )
+              }
+
+              <Button loading={loading}
+                disabled={loading}
+                primary
+                onClick={this.submit}
+                style={{ marginTop: '10px' }}
+              >
+                Purchase
+              </Button>
+            </React.Fragment>
+        }
+
       </div>
     );
   }
@@ -292,7 +475,7 @@ class CheckoutForm extends Component {
 
 
 
-const InjectedForm = injectStripe(CheckoutForm);
+const InjectedForm = withRouter(injectStripe(CheckoutForm));
 
 
 
