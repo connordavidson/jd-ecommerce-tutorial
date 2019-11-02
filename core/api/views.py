@@ -5,7 +5,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django_countries import countries
 
-from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -296,4 +296,16 @@ class AddressListView(ListAPIView):
 class AddressCreateView(CreateAPIView):
     permission_classes = (IsAuthenticated, )
     serializer_class = AddressSerializer
+    queryset = Address.objects.all()
+
+#created at https://youtu.be/QDKHL83tpSE?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1050
+class AddressUpdateView(UpdateAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = AddressSerializer
+    queryset = Address.objects.all()
+
+
+#made at https://youtu.be/QDKHL83tpSE?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1430
+class AddressDeleteView(DestroyAPIView):
+    permission_classes = (IsAuthenticated, )
     queryset = Address.objects.all()

@@ -88,7 +88,7 @@ class CustomLayout extends React.Component {
                                   );
                                 })
                               }
-
+                              
                               <Dropdown.Divider />
                               {/* link to the checkout page */}
                               <Dropdown.Item

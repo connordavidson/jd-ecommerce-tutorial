@@ -42,3 +42,9 @@ export const countryListURL = 'http://127.0.0.1:8000/api/countries/';
 
 //added at https://youtu.be/c54wYYIXZ-A?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=2560
 export const userIDURL = 'http://127.0.0.1:8000/api/user-id/';
+
+//cerated at https://youtu.be/QDKHL83tpSE?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1125
+export const addressUpdateURL = (id) => `http://127.0.0.1:8000/api/addresses/${id}/update/`;
+
+//created at https://youtu.be/QDKHL83tpSE?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1460
+export const addressDeleteURL = (id) => `http://127.0.0.1:8000/api/addresses/${id}/delete/`;
