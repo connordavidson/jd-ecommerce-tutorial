@@ -54,3 +54,6 @@ export const orderItemDeleteURL = (id) => `http://127.0.0.1:8000/api/order-items
 
 //created at https://youtu.be/8UEZsm4tCpY?t=1175
 export const orderItemUpdateQuantityURL = 'http://127.0.0.1:8000/api/order-item/update-quantity/';
+
+//created at https://youtu.be/cZw2Mp5ep5g?t=190
+export const paymentListURL = 'http://127.0.0.1:8000/api/payments/';

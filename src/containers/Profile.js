@@ -1,6 +1,6 @@
 import React from 'react';
-import {connect} from 'react-redux';
-import {Redirect} from 'react-router-dom';
+import { connect } from 'react-redux';
+import { Redirect } from 'react-router-dom';
 import {
     Header,
     Grid,
@@ -16,6 +16,8 @@ import {
     Card,
     Label,
     Button,
+    Table,
+    Icon,
 
   } from 'semantic-ui-react';
 
@@ -26,6 +28,7 @@ import {
     userIDURL,
     addressUpdateURL,
     addressDeleteURL,
+    paymentListURL,
 
   } from '../constants';
 
@@ -34,6 +37,69 @@ import {authAxios} from '../utils';
 //made around https://youtu.be/QDKHL83tpSE?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=499
 const UPDATE_FORM = 'UPDATE_FORM';
 const CREATE_FORM = 'CREATE_FORM';
+
+//made at https://youtu.be/cZw2Mp5ep5g?t=445
+class PaymentHistory extends React.Component {
+
+  state = {
+    payments: [],
+  }
+
+  componentDidMount(){
+    this.handleFetchPayments()
+  }
+
+  handleFetchPayments = () => {
+    this.setState({loading: true});
+    authAxios
+    .get(paymentListURL)
+    .then(res => {
+      this.setState({
+        loading: false,
+        payments: res.data
+      });
+    })
+    .catch(err => {
+      this.setState({ error: err, loading: false});
+    })
+  }
+
+  render(){
+
+    const {payments} = this.state;
+
+    return(
+
+      <Table celled>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell>ID</Table.HeaderCell>
+            <Table.HeaderCell>Amount</Table.HeaderCell>
+            <Table.HeaderCell>Date</Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+
+        <Table.Body>
+          {payments.map(p => {
+            return(
+              <Table.Row key={p.id}>
+                <Table.Cell>{p.id}</Table.Cell>
+                <Table.Cell>{p.amount}</Table.Cell>
+                <Table.Cell>{new Date(p.timestamp).toUTCString()}</Table.Cell>
+              </Table.Row>
+            )
+          })}
+        </Table.Body>
+
+      </Table>
+
+    )
+  }
+
+}
+
+
+
 
 //created at https://youtu.be/QDKHL83tpSE?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=213
 class AddressForm extends React.Component {
@@ -113,10 +179,8 @@ class AddressForm extends React.Component {
     const {formType} = this.props;
     console.log(formType);
     if (formType === UPDATE_FORM) {
-      console.log('handleUpdateAddress');
       this.handleUpdateAddress();
     } else {
-      console.log('handleCreateAddress');
       this.handleCreateAddress();
     }
   }
@@ -282,6 +346,19 @@ class Profile extends React.Component {
     });
   }
 
+  //made at https://youtu.be/cZw2Mp5ep5g?t=234
+  //just gets the active item from the State
+  handleGetActiveItem = () => {
+    const { activeItem } = this.state;
+    if(activeItem === "billingAddress"){
+      return "Billing Address";
+    }else if(activeItem === "shippingAddress"){
+      return "Shipping Address";
+    }
+    return "Payment History";
+
+  }
+
 
   //made at https://youtu.be/c54wYYIXZ-A?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1763
   handleFormatCountries = (countries) => {
@@ -297,6 +374,8 @@ class Profile extends React.Component {
       }
     })
   }
+
+
 
   //made at https://youtu.be/QDKHL83tpSE?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1486
   handleDeleteAddress = (addressID) => {
@@ -323,7 +402,6 @@ class Profile extends React.Component {
     authAxios
     .get(userIDURL)
     .then(res => {
-
       this.setState({ userID: res.data.userID });
     })
     .catch(err => {
@@ -365,8 +443,79 @@ class Profile extends React.Component {
   handleCallback = () => {
     this.handleFetchAddresses();
     this.setState({ selectedAddress: null});
-
   }
+
+  renderAddresses = () => {
+    const {
+        activeItem,
+        addresses,
+        countries,
+        selectedAddress,
+        userID,
+
+      } = this.state;
+    console.log("this.state: ", this.state);
+
+    return (
+
+      <React.Fragment>
+        <Card.Group>
+          {
+            addresses.map(a => {
+              return (
+                <Card key={a.id}>
+                  <Card.Content>
+                    {a.default &&
+                      <Label as='a' color='blue' ribbon="right">Default Address</Label>
+                    }
+                    <Card.Header> {a.street_address} | {a.apartment_address} </Card.Header>
+                    <Card.Meta>{a.country}</Card.Meta>
+                    <Card.Description>{a.zip}</Card.Description>
+                  </Card.Content>
+
+                  <Card.Content extra>
+                    <Button basic color='yellow' onClick={ () => this.handleSelectAddress(a) }>
+                      Update
+                    </Button>
+                    <Button basic color='red' onClick={ () => this.handleDeleteAddress(a.id) }>
+                      Delete
+                    </Button>
+                  </Card.Content>
+                </Card>
+              )
+            })
+          }
+        </Card.Group>
+
+        {addresses.length > 0 ? <Divider /> : null }
+
+        {selectedAddress === null ?
+          (
+            <AddressForm
+              activeItem={activeItem}
+              countries={countries}
+              formType={CREATE_FORM}
+              userID={userID}
+              callback={this.handleCallback}
+            />
+          ) : (
+            null
+          )
+        }
+
+        {selectedAddress && (
+          <AddressForm
+            activeItem={activeItem}
+            userID={userID}
+            countries={countries}
+            address={selectedAddress}
+            formType={UPDATE_FORM}
+            callback={this.handleCallback}
+          />
+        )}
+      </React.Fragment>
+    )
+  };
 
 
   render(){
@@ -374,19 +523,19 @@ class Profile extends React.Component {
     const {
         activeItem,
         error,
-        loading,
-        addresses,
-        countries,
-        selectedAddress,
-        userID,
-
+        loading
       } = this.state;
+      console.log("this.state: ", this.state);
 
-    const {isAuthenticated} = this.props;
+
     //made at https://youtu.be/QDKHL83tpSE?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1645
     //checks that the user is authenticated before displaying the page
+    const {isAuthenticated} = this.props;
+    console.log("isauthenticated??: ", isAuthenticated);
     if(!isAuthenticated){
-      return <Redirect to='/login'/>
+      console.log("!isauthenticated: ", !isAuthenticated);
+      console.log("redirected");
+      return (<Redirect to='/login'/>)
     }
 
     return (
@@ -441,90 +590,31 @@ class Profile extends React.Component {
           </Grid.Column>
 
           <Grid.Column width={10}>
-
-            <Header>
-              {
-                `Update your
-                  ${
-                    activeItem === 'billingAddress' ?
-                    'billing' :
-                    'shipping'
-                  }
-                address`
-              }
-            </Header>
+            <Header> {this.handleGetActiveItem()} </Header>
             <Divider />
-            <Card.Group>
 
-            { //creates the cards for the saved addresses
-              addresses.map(a => {
-                return (
-                  <Card  key={a.id} >
-                    <Card.Content>
-                      {
-                        a.default &&
-                        <Label as='a' color='blue' ribbon="right">Default Address</Label>
-                      }
-                      <Card.Header> {a.street_address} | {a.apartment_address} </Card.Header>
-                      <Card.Meta>{a.country}</Card.Meta>
-                      <Card.Description>
-                        {a.zip}
-                      </Card.Description>
-                    </Card.Content>
+            {// made at https://youtu.be/cZw2Mp5ep5g?t=370
+              activeItem === 'paymentHistory' ? (
+                <PaymentHistory/>
+              ): (
+                this.renderAddresses()
+              )
 
-                    <Card.Content extra>
-                        <Button basic color='yellow' onClick={ () => this.handleSelectAddress(a) }>
-                          Update
-                        </Button>
-                        <Button basic color='red' onClick={ () => this.handleDeleteAddress(a.id) }>
-                          Delete
-                        </Button>
-                    </Card.Content>
 
-                  </Card>
-                )
-              })}
-
-            </Card.Group>
-
-            {
-              //removes the double divider when there is no address
-              addresses.length > 0 ?  <Divider /> : null
             }
 
-            { selectedAddress === null ?
 
-                <AddressForm
-                  activeItem={activeItem}
-                  countries={countries}
-                  formType={CREATE_FORM}
-                  userID={userID}
-                  callback={this.handleCallback}
-                />
-
-              : null
-            }
-
-            {selectedAddress && (
-              <AddressForm
-                activeItem={activeItem}
-                userID={userID}
-                countries={countries}
-                address={selectedAddress}
-                formType={UPDATE_FORM}
-                callback={this.handleCallback}
-              />
-            )}
           </Grid.Column>
         </Grid.Row>
       </Grid>
-    )
+    );
   }
-}
+};
 
 
-//made at https://youtu.be/QDKHL83tpSE?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1615
+// made at https://youtu.be/QDKHL83tpSE?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1615
 const mapStateToProps = (state) => {
+  console.log("state.auth.token: ", state.auth.token );
   return {
     isAuthenticated: state.auth.token !== null
   }

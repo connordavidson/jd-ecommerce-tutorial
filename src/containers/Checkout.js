@@ -261,7 +261,7 @@ class CheckoutForm extends Component {
         //this is what gets triggered if there is no current order
         if(err.response.status === 404){
           //made at https://youtu.be/NaJ-b0ZaSoI?t=1620
-          //moves the user to /products if they don't have an active order. 
+          //moves the user to /products if they don't have an active order.
           this.props.history.push('/products');
         } else{
           this.setState( {error: err, loading: false} );
@@ -473,11 +473,7 @@ class CheckoutForm extends Component {
 }
 
 
-
-
 const InjectedForm = withRouter(injectStripe(CheckoutForm));
-
-
 
 
 const WrappedForm = () => (

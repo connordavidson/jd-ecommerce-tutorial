@@ -12,10 +12,9 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from core.models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile, Variation, ItemVariation
-from .serializers import ItemSerializer, OrderSerializer, ItemDetailSerializer, AddressSerializer
+from .serializers import ItemSerializer, OrderSerializer, ItemDetailSerializer, AddressSerializer, PaymentSerializer
 
 import stripe
-
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -351,3 +350,12 @@ class AddressUpdateView(UpdateAPIView):
 class AddressDeleteView(DestroyAPIView):
     permission_classes = (IsAuthenticated, )
     queryset = Address.objects.all()
+
+
+#created at https://youtu.be/cZw2Mp5ep5g?t=53
+class PaymentListView(ListAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = PaymentSerializer
+
+    def get_queryset(self):
+        return Payment.objects.filter(user=self.request.user)
