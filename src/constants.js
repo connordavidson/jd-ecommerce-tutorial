@@ -48,3 +48,9 @@ export const addressUpdateURL = (id) => `http://127.0.0.1:8000/api/addresses/${i
 
 //created at https://youtu.be/QDKHL83tpSE?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=1460
 export const addressDeleteURL = (id) => `http://127.0.0.1:8000/api/addresses/${id}/delete/`;
+
+//created at https://youtu.be/8UEZsm4tCpY?t=245
+export const orderItemDeleteURL = (id) => `http://127.0.0.1:8000/api/order-items/${id}/delete/`
+
+//created at https://youtu.be/8UEZsm4tCpY?t=1175
+export const orderItemUpdateQuantityURL = 'http://127.0.0.1:8000/api/order-item/update-quantity/';

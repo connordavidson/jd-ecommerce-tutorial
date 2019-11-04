@@ -39,7 +39,7 @@ class CustomLayout extends React.Component {
   render() {
     //instantiates constants from the props
     const { authenticated, cart, loading } = this.props;
-    console.log(cart);
+    
 
     return (
       <div>
@@ -88,7 +88,7 @@ class CustomLayout extends React.Component {
                                   );
                                 })
                               }
-                              
+
                               <Dropdown.Divider />
                               {/* link to the checkout page */}
                               <Dropdown.Item

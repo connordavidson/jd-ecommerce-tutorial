@@ -14,6 +14,8 @@ from .views import (
         UserIDView,
         AddressUpdateView,
         AddressDeleteView,
+        OrderItemDeleteView,
+        OrderQuantityUpdateView,
 
     )
 
@@ -32,5 +34,6 @@ urlpatterns = [
     path( 'addresses/create/', AddressCreateView.as_view(), name='address-create'),
     path( 'countries/', CountryListView.as_view(), name='country-list' ),
     path( 'addresses/<pk>/delete/', AddressDeleteView.as_view(), name='address-delete'),
-
+    path( 'order-items/<pk>/delete/', OrderItemDeleteView.as_view(), name='order-item-delete'),
+    path( 'order-item/update-quantity/', OrderQuantityUpdateView.as_view(), name='order-item-update-quantity'),
 ]

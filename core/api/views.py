@@ -38,6 +38,48 @@ class ItemDetailView(RetrieveAPIView):
     serializer_class = ItemDetailSerializer
     queryset = Item.objects.all()
 
+#made at https://youtu.be/8UEZsm4tCpY?t=975
+class OrderQuantityUpdateView(APIView):
+    def post(self, request, *args, **kwargs):
+        slug = request.data.get('slug', None)
+        if slug is None:
+            return Response({"message": "Invalid Data"}, status=HTTP_400_BAD_REQUEST)
+        item = get_object_or_404(Item, slug=slug)
+        #get the order and filter based on the current user
+        order_qs = Order.objects.filter(
+            user=request.user,
+            ordered=False
+        )
+        #if the order exists
+        if order_qs.exists():
+            order = order_qs[0]
+            # check if the order item is in the order
+            if order.items.filter(item__slug=item.slug).exists():
+                #filters by the item and the user
+                order_item = OrderItem.objects.filter(
+                    item=item,
+                    user=request.user,
+                    ordered=False
+                )[0]
+                #if the quantity is greater than 1, decrement. quantity is 1, remove
+                if order_item.quantity > 1:
+                    order_item.quantity -= 1
+                    order_item.save()
+                else:
+                    order.items.remove(order_item)
+                return Response(status=HTTP_200_OK)
+            else:
+                return Response({"message": "This item was not in your cart"}, status=HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"message": "You do not have an active order"}, status=HTTP_400_BAD_REQUEST)
+
+
+
+
+#made at https://youtu.be/8UEZsm4tCpY?t=205
+class OrderItemDeleteView(DestroyAPIView):
+    permission_classes = (IsAuthenticated, )
+    queryset = OrderItem.objects.all()
 
 
 #created at https://youtu.be/0JOl3ckfGAM?list=PLLRM7ROnmA9Hp8j_1NRCK6pNVFfSf4G7a&t=290 ish

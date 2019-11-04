@@ -75,6 +75,7 @@ class ProductDetail extends React.Component {
   //made at https://youtu.be/qJN1_2ZwqeA?t=1386
   handleFormatData = (formData) => {
     //returns the keys of the formData array becuase that is what the backend is expecting
+    //convert {color: 1, size:2} to [1,2] 
     return Object.keys(formData).map(key =>{
       return formData[key];
     })
@@ -82,15 +83,12 @@ class ProductDetail extends React.Component {
 
 
 
-  handleAddToCart = slug => {
+  handleAddToCart = (slug) => {
 
     this.setState({ loading: true });
     const {formData} = this.state;
-    console.log("formData: ", formData);
-    //filters  the data into the correct format fot hte backend
+    //filters  the data into the correct format fot the backend
     const variations = this.handleFormatData(formData);
-    console.log("formVariations: ", variations);
-
     //authAxios makes sure that the user is signed in before adding to cart... just use axios for adding to cart while signed out
     authAxios
     .post( addToCartURL , { slug, variations } )
@@ -103,7 +101,6 @@ class ProductDetail extends React.Component {
       this.setState({ error: err, loading: false });
       console.log(err , 'add-to-cart failed ');
     });
-
   }
 
 
